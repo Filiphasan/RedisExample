@@ -13,6 +13,7 @@ public sealed class CategoryEndpoint : ICarterModule
 
         group.MapGet("", GetAllAsync);
         group.MapGet("/{id}", GetByIdAsync);
+        group.MapGet("/{id}/memoryCache", GetByIdWitInMemoryAsync);
         group.MapGet("names/{name}", GetByNameAsync);
         group.MapPost("", AddAsync);
         group.MapPut("/{id}", UpdateAsync);
@@ -27,6 +28,11 @@ public sealed class CategoryEndpoint : ICarterModule
     private static async Task<IResult> GetByIdAsync(Ulid id, ICategoryService categoryService)
     {
         return Results.Ok(await categoryService.GetByIdAsync(id));
+    }
+
+    private static async Task<IResult> GetByIdWitInMemoryAsync(Ulid id, ICategoryService categoryService)
+    {
+        return Results.Ok(await categoryService.GetByIdWithInMemoryAsync(id));
     }
     
     private static async Task<IResult> GetByNameAsync(string name, ICategoryService categoryService)

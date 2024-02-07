@@ -4,15 +4,18 @@ using RedisExample.Web.Services.Interfaces;
 
 namespace RedisExample.Web;
 
-internal static class DependencyInjection
+public static class DependencyInjection
 {
-    internal static void AddServices(this IServiceCollection services, IConfiguration configuration)
+    public static void AddServices(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddMemoryCache();
 
         var multiplexer = RedisHelper.GetConnection(configuration);
         services.AddSingleton(multiplexer);
-        services.AddSingleton<ICacheService, RedisCacheService>();
+        // ICacheService kullanılan yerlerde varsayılan olarak Redis'in çalışmasını sağlar
+        services.AddSingleton<ICacheService, MemCacheService>();
+        // ICacheService kullanılan yerlerde varsayılan olarak In-Memory Cache'in çalışmasını sağlar
+        // services.AddSingleton<ICacheService, MemCacheService>()
         services.AddKeyedSingleton<ICacheService, RedisCacheService>("redis");
         services.AddKeyedSingleton<ICacheService, MemCacheService>("memcache");
 

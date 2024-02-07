@@ -4,7 +4,10 @@ using RedisExample.Web.Services.Interfaces;
 
 namespace RedisExample.Web.Services.Implementations;
 
-public sealed class CategoryService(ICacheService cacheService) : ICategoryService
+public sealed class CategoryService(
+    ICacheService cacheService,
+    [FromKeyedServices("memcache")] ICacheService memCacheService)
+    : ICategoryService
 {
     private readonly List<Category> _categories = [];
 
@@ -34,6 +37,7 @@ public sealed class CategoryService(ICacheService cacheService) : ICategoryServi
         await cacheService.SetAsync(string.Format(CacheKeyConstant.Category.GetCategoryById, newCategory.Id), newCategory, TimeSpan.FromDays(1));
         await cacheService.SetAsync(string.Format(CacheKeyConstant.Category.GetCategoryByName, newCategory.Name), newCategory, TimeSpan.FromDays(1));
         await cacheService.SetAsync(CacheKeyConstant.Category.GetAllCategories, _categories, TimeSpan.FromDays(1));
+        await memCacheService.SetAsync(string.Format(CacheKeyConstant.Category.GetCategoryById, newCategory.Id), newCategory, TimeSpan.FromDays(1));
         return newCategory.Id;
     }
 
@@ -55,6 +59,14 @@ public sealed class CategoryService(ICacheService cacheService) : ICategoryServi
 
         await cacheService.SetAsync(cacheKey, category, TimeSpan.FromDays(1));
         return category;
+    }
+
+    public async Task<Category?> GetByIdWithInMemoryAsync(Ulid? id)
+    {
+        ArgumentNullException.ThrowIfNull(id);
+        var cacheKey = string.Format(CacheKeyConstant.Category.GetCategoryById, id);
+        var cacheResult = await memCacheService.GetAsync<Category>(cacheKey);
+        return cacheResult;
     }
 
     public async Task<Category?> GetByNameAsync(string? name)
