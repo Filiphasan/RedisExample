@@ -13,7 +13,7 @@ public static class DependencyInjection
         var multiplexer = RedisHelper.GetConnection(configuration);
         services.AddSingleton(multiplexer);
         // ICacheService kullanılan yerlerde varsayılan olarak Redis'in çalışmasını sağlar
-        services.AddSingleton<ICacheService, MemCacheService>();
+        services.AddSingleton<ICacheService, RedisCacheService>();
         // ICacheService kullanılan yerlerde varsayılan olarak In-Memory Cache'in çalışmasını sağlar
         // services.AddSingleton<ICacheService, MemCacheService>()
         services.AddKeyedSingleton<ICacheService, RedisCacheService>("redis");
